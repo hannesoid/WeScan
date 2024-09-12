@@ -6,13 +6,12 @@ let package = Package(
     name: "WeScan",
     defaultLocalization: "en",
     platforms: [
-        .iOS(.v13)
+        .iOS(.v12)
     ],
     products: [
         .library(name: "WeScan", targets: ["WeScan"])
     ],
     dependencies: [
-        .package(url: "https://github.com/pointfreeco/swift-snapshot-testing", from: "1.10.0")
     ],
     targets: [
         .target(name: "WeScan",
@@ -22,11 +21,12 @@ let package = Package(
         .testTarget(
             name: "WeScanTests",
             dependencies: [
-                "WeScan",
-                .product(name: "SnapshotTesting", package: "swift-snapshot-testing")
+                "WeScan"
             ],
+            exclude:["Info.plist"],
             resources: [
-                .process("Resources")
+                .process("Resources"),
+                .copy("__Snapshots__")
             ]
         )
     ]
