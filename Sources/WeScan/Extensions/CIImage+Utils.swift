@@ -11,21 +11,18 @@ import Foundation
 import UIKit
 
 extension CIImage {
+
     /// Applies an AdaptiveThresholding filter to the image, which enhances the image and makes it completely gray scale
     func applyingAdaptiveThreshold() -> UIImage? {
-        guard let colorKernel = CIColorKernel(source:
-            """
-            kernel vec4 color(__sample pixel, float inputEdgeO, float inputEdge1)
-            {
-                float luma = dot(pixel.rgb, vec3(0.2126, 0.7152, 0.0722));
-                float threshold = smoothstep(inputEdgeO, inputEdge1, luma);
-                return vec4(threshold, threshold, threshold, 1.0);
-            }
-            """
-            ) else { return nil }
+        // Load Metal library data
+        guard let libraryURL: URL = Bundle.module.url(forResource: "default", withExtension: "metallib"),
+              let libraryData = try? Data(contentsOf: libraryURL),
+              let colorKernel = try? CIColorKernel(functionName: "adaptiveThresholdKernel", fromMetalLibraryData: libraryData) else {
+            return nil
+        }
 
-        let firstInputEdge = 0.25
-        let secondInputEdge = 0.75
+        let firstInputEdge = 0.25 as Float
+        let secondInputEdge = 0.75 as Float
 
         let arguments: [Any] = [self, firstInputEdge, secondInputEdge]
 
