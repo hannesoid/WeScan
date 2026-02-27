@@ -39,7 +39,7 @@ protocol RectangleDetectionDelegateProtocol: NSObjectProtocol {
         withQuad quad: Quadrilateral?
     )
 
-    /// Called when an error occured with the capture session manager.
+    /// Called when an error occurred with the capture session manager.
     /// - Parameters:
     ///   - captureSessionManager: The `CaptureSessionManager` that encountered an error.
     ///   - error: The encountered error.
@@ -141,19 +141,31 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
 
         switch authorizationStatus {
         case .authorized:
-            DispatchQueue.main.async {
-                self.captureSession.startRunning()
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                self?.captureSession.startRunning()
+                DispatchQueue.main.async {
+                    guard let self = self else { return }
+                    self.isDetecting = true
+                }
             }
-            isDetecting = true
         case .notDetermined:
-            AVCaptureDevice.requestAccess(for: AVMediaType.video, completionHandler: { _ in
-                DispatchQueue.main.async { [weak self] in
-                    self?.start()
+            AVCaptureDevice.requestAccess(for: AVMediaType.video, completionHandler: { [weak self] granted in
+                DispatchQueue.main.async {
+                    guard let self = self else { return }
+                    if granted {
+                        self.start()
+                    } else {
+                        let error = ImageScannerControllerError.authorization
+                        self.delegate?.captureSessionManager(self, didFailWithError: error)
+                    }
                 }
             })
         default:
-            let error = ImageScannerControllerError.authorization
-            delegate?.captureSessionManager(self, didFailWithError: error)
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                let error = ImageScannerControllerError.authorization
+                self.delegate?.captureSessionManager(self, didFailWithError: error)
+            }
         }
     }
 
@@ -256,38 +268,6 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
 
 extension CaptureSessionManager: AVCapturePhotoCaptureDelegate {
 
-    // swiftlint:disable function_parameter_count
-    func photoOutput(_ captureOutput: AVCapturePhotoOutput,
-                     didFinishProcessingPhoto photoSampleBuffer: CMSampleBuffer?,
-                     previewPhoto previewPhotoSampleBuffer: CMSampleBuffer?,
-                     resolvedSettings: AVCaptureResolvedPhotoSettings,
-                     bracketSettings: AVCaptureBracketedStillImageSettings?,
-                     error: Error?
-    ) {
-        if let error {
-            delegate?.captureSessionManager(self, didFailWithError: error)
-            return
-        }
-
-        isDetecting = false
-        rectangleFunnel.currentAutoScanPassCount = 0
-        delegate?.didStartCapturingPicture(for: self)
-
-        if let sampleBuffer = photoSampleBuffer,
-            let imageData = AVCapturePhotoOutput.jpegPhotoDataRepresentation(
-                forJPEGSampleBuffer: sampleBuffer,
-                previewPhotoSampleBuffer: nil
-            ) {
-            completeImageCapture(with: imageData)
-        } else {
-            let error = ImageScannerControllerError.capture
-            delegate?.captureSessionManager(self, didFailWithError: error)
-            return
-        }
-
-    }
-
-    @available(iOS 11.0, *)
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
         if let error {
             delegate?.captureSessionManager(self, didFailWithError: error)

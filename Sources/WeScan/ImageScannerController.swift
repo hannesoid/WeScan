@@ -27,11 +27,11 @@ public protocol ImageScannerControllerDelegate: NSObjectProtocol {
     /// - Discussion: Your delegate's implementation of this method should dismiss the image scanner controller.
     func imageScannerControllerDidCancel(_ scanner: ImageScannerController)
 
-    /// Tells the delegate that an error occured during the user's scanning experience.
+    /// Tells the delegate that an error occurred during the user's scanning experience.
     ///
     /// - Parameters:
     ///   - scanner: The scanner controller object managing the scanning interface.
-    ///   - error: The error that occured.
+    ///   - error: The error that occurred.
     func imageScannerController(_ scanner: ImageScannerController, didFailWithError error: Error)
 }
 
@@ -195,18 +195,6 @@ public struct ImageScannerResults {
 
     /// The detected rectangle which was used to generate the `scannedImage`.
     public var detectedRectangle: Quadrilateral
-
-    @available(*, unavailable, renamed: "originalScan")
-    public var originalImage: UIImage?
-
-    @available(*, unavailable, renamed: "croppedScan")
-    public var scannedImage: UIImage?
-
-    @available(*, unavailable, renamed: "enhancedScan")
-    public var enhancedImage: UIImage?
-
-    @available(*, unavailable, renamed: "doesUserPreferEnhancedScan")
-    public var doesUserPreferEnhancedImage = false
 
     init(
         detectedRectangle: Quadrilateral,
