@@ -182,7 +182,6 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
         CaptureSession.current.setImageOrientation()
         let photoSettings = AVCapturePhotoSettings()
         photoSettings.isHighResolutionPhotoEnabled = true
-        photoSettings.isAutoStillImageStabilizationEnabled = true
         photoOutput.capturePhoto(with: photoSettings, delegate: self)
     }
 

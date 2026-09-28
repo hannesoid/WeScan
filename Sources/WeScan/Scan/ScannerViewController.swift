@@ -60,7 +60,8 @@ public final class ScannerViewController: UIViewController {
     }()
 
     private lazy var activityIndicator: UIActivityIndicatorView = {
-        let activityIndicator = UIActivityIndicatorView(style: .gray)
+        let activityIndicator = UIActivityIndicatorView(style: .medium)
+        activityIndicator.color = .gray
         activityIndicator.hidesWhenStopped = true
         activityIndicator.translatesAutoresizingMaskIntoConstraints = false
         return activityIndicator
@@ -94,7 +95,8 @@ public final class ScannerViewController: UIViewController {
         captureSessionManager?.start()
         UIApplication.shared.isIdleTimerDisabled = true
 
-        navigationController?.navigationBar.barStyle = .blackTranslucent
+        navigationController?.navigationBar.barStyle = .black
+        navigationController?.navigationBar.isTranslucent = true
     }
 
     override public func viewDidLayoutSubviews() {

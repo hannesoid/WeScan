@@ -6,7 +6,7 @@ let package = Package(
     name: "WeScan",
     defaultLocalization: "en",
     platforms: [
-        .iOS(.v12)
+        .iOS(.v15)
     ],
     products: [
         .library(name: "WeScan", targets: ["WeScan"])
